@@ -59,8 +59,20 @@ En este caso, el valor **0.72** indica que las variables rcpage y donage **no so
 
 ```{r}
 regression <- glm(gvhd~index+donage+preg, data = injerto, family = binomial(link = "logit"))
-regression
+summary(regression)
+```
+Se observa que la variable $index$ con p-valor de $0.01$ es la más significativa en la predicción.
+
+**(c)** Determinar la estimación de p en función de las variables que resulten significativas.
+
+```{r}
+regression <- glm(formula = gvhd ~ index, family = binomial(link = "logit"), data = injerto)
+summary(regression)
+```
+(d) ¿Qué probabilidad de presentar la Enfermedad de injerto contra huésped tiene un individuo con índice reacciones de linfocitos igual a 2′5, cuyo donante que nunca ha estado embarazada y tiene una edad de 55 años?
+
+```{r eval=FALSE}
+probability <- predict.glm(object = regression, data.frame(index=2.5, preg=0 ,donage=55), type = "response")
 ```
 
-
-
+La probabilidad de presentar la enfermedad es del `r sprintf("%.2f",probability*100)`%
