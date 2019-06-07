@@ -13,6 +13,19 @@ library(knitr)
 opts_chunk$set(dev = 'pdf', fig.align = 'center')
 ```
 
-```{r}
-plot(cars)
-```
+## Problema 4
+
+  Se desea estudiar el número de hembras de la mosca tropical americana en una determinada región. Dicha mosca se caracteriza por poner sus huevos en un mosquito, pasando las larvas de la mosca a la piel de la persona cuya sangre ha chupado el mosquito.
+  Examinada la región en cuestión en 10 días elegidos al azar, se obtuvo el siguiente número de moscas hembra de la citada especie:
+                    2,1,3,5,7,2,1,2,3,2
+Se pide:
+
+ a) Determinar la estimación clásica y cuatro estimaciones robustas del número medio de moscas hembra en la región en estudio. ¿Con qué estimación concluiría?
+ 
+ b) Determinar también la estimación clásica y cuatro estimaciones robustas de la desviación típica del número de moscas hembra en la citada región. ¿Con qué estimación concluiría?
+ 
+## Problema 5
+
+  Los tiempos, en minutos, que esperaron, hasta que fueron atendidos en un determinado banco, diez clientes elegidos al azar fueron los siguientes: 1'5, 2, 2'5, 3, 1, 5, 5'5, 4'5, 3, 3. Determinar un intervalo de confianza de coeficiente de confianza 0'95, para la media 0'2-recortada del tiempo de espera y otro intervalo, también de coeficiente de confianza 0'95 para el tiempo mediano de espera.
+
+ 
