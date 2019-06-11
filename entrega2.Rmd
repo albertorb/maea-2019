@@ -2,16 +2,49 @@
 title: 'MAEA: Problemas 4,5,6,7 y 8'
 author: "Alberto Rincón Borreguero"
 output:
+  html_notebook: default
   html_document:
     df_print: paged
-  html_notebook: default
   pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
 library(knitr)
+if (!require(psych)) install.packages('psych')
+  library(psych)
+if (!require(MASS)) install.packages('MASS')
+library(MASS)
+if (!require(asbio)) install.packages('asbio')
+library(asbio)
+if (!require(WRS2)) install.packages('WRS2')
+library(WRS2)
+
+
 opts_chunk$set(dev = 'pdf', fig.align = 'center')
 ```
+
+```{r echo=FALSE, eval=FALSE}
+pbvar <-
+function(x,beta=.2){
+#   Compute the percentage bend midvariance
+#
+#   beta is the bending constant for omega sub N.
+#
+pbvar=0
+w<-abs(x-median(x))
+w<-sort(w)
+m<-floor((1-beta)*length(x)+.5)
+omega<-w[m]
+if(omega>0){
+y<-(x-median(x))/omega
+z<-ifelse(y>1,1,y)
+z<-ifelse(z<(-1),-1,z)
+pbvar<-length(x)*omega^2*sum(z^2)/(length(x[abs(y)<1]))^2
+}
+pbvar
+}
+```
+
 
 ## Problema 4
 
@@ -22,10 +55,67 @@ Se pide:
 
  a) Determinar la estimación clásica y cuatro estimaciones robustas del número medio de moscas hembra en la región en estudio. ¿Con qué estimación concluiría?
  
+```{r problema-4a}
+
+data <- c(2,1,3,5,7,2,1,2,3,2)
+
+# media clasica
+mean(data) 
+
+# media alpha-winsorizada
+winsor.mean(data, trim = 0.1)
+winsor.mean(data, trim = 0.2)
+
+# media alpha-recortada muestral
+mean(data, trim = 0.1)
+mean(data, trim = 0.2)
+
+# mediana muestral
+median(data)
+
+# estimador de huber
+huber(data, 1.28)$mu
+```
+Dada la siguiente distribución de los datos:
+
+```{r}
+hist(data, main = 'Distribución del modelo poblacional')
+```
+Al no ser una distribución normal, se descarta la elección a priori de la estimación clásica que, en caso de normalidad, asegura mínima varianza.
+
+Por tanto, y en base a las recomendaciones de la pagina 76 del libro métodos robustos y de remuestreo, **se elige el estimador huber**.
+
  b) Determinar también la estimación clásica y cuatro estimaciones robustas de la desviación típica del número de moscas hembra en la citada región. ¿Con qué estimación concluiría?
+
+```{r problema-4b}
+
+# cuasidesivación típica muestral (estimación clásica)
+sqrt(var(data))
+
+# Desviación absoluta mediana estandarizada
+mad(data)
+
+#Cuasidesviación típica alpha-winsorizada muestral
+sqrt(winsor.var(data))
+
+#Raíz de la varianza media biponderada
+sqrt(r.bw(data))[[1]]
+
+#Raíz de la varianza media de porcentaje ajustado
+sqrt(pbvar(data))
+
+```
+De la misma forma que en el apartado anterior, se descarta la elección a priori de la estimación clásica y también se sigue la recomendación del libro para **elegir como estimador la desviación absoluta mediana estandarizada** (NMAD)
+ 
  
 ## Problema 5
 
   Los tiempos, en minutos, que esperaron, hasta que fueron atendidos en un determinado banco, diez clientes elegidos al azar fueron los siguientes: 1'5, 2, 2'5, 3, 1, 5, 5'5, 4'5, 3, 3. Determinar un intervalo de confianza de coeficiente de confianza 0'95, para la media 0'2-recortada del tiempo de espera y otro intervalo, también de coeficiente de confianza 0'95 para el tiempo mediano de espera.
+  
+```{r problema-5}
+
+data <- c(1.5, 2, 2.5, 3, 1, 5, 5.5, 4.5, 3, 3)
+```
+
 
  
