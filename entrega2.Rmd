@@ -18,6 +18,10 @@ if (!require(asbio)) install.packages('asbio')
 library(asbio)
 if (!require(WRS2)) install.packages('WRS2')
 library(WRS2)
+if (!require(DescTools)) install.packages('DescTools')
+library(DescTools)
+if (!require(plotrix)) install.packages('plotrix')
+library(plotrix)
 
 
 opts_chunk$set(dev = 'pdf', fig.align = 'center')
@@ -117,5 +121,19 @@ De la misma forma que en el apartado anterior, se descarta la elección a priori
 data <- c(1.5, 2, 2.5, 3, 1, 5, 5.5, 4.5, 3, 3)
 ```
 
+Cálculo del intervalo de confianza con coeficiente 0'95 para media 0'2-recortada.
+```{r}
+trimCi <- MeanCI(data, conf.level = 0.95 , trim=0.2)
 
- 
+plot(density(data), main = "Intervalo de confianza a 0'95 para media 0'2-recortada ") + abline(v=trimCi[1], col='green') + text(trimCi[1], 0, "Media") + abline(v=trimCi[2], col='red') + text(trimCi[2], 0.05, "Cota inferior IC") + abline(v=trimCi[3], col='red') + text(trimCi[3], 0.05, "Cota superior IC")
+
+```
+Cálculo del intervalo de confianza con coeficiente 0'95 para el tiempo mediano de espera.
+
+```{r}
+medianCI <- MedianCI(data, conf.level = 0.95)
+
+plot(density(data), main = "Intervalo de confianza a 0'95 para mediana ") + abline(v=medianCI[1], col='green') + text(medianCI[1], 0, "Mediana") + abline(v=medianCI[2], col='red') + text(medianCI[2], 0.05, "Cota inferior IC") + abline(v=medianCI[3], col='red') + text(medianCI[3], 0.05, "Cota superior IC")
+
+```
+
