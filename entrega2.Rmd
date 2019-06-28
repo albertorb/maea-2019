@@ -22,12 +22,14 @@ if (!require(DescTools)) install.packages('DescTools')
 library(DescTools)
 if (!require(plotrix)) install.packages('plotrix')
 library(plotrix)
+if (!require(onewaytests)) install.packages('onewaytests')
+library(onewaytests)
 
 
 opts_chunk$set(dev = 'pdf', fig.align = 'center')
 ```
 
-```{r echo=FALSE, eval=FALSE}
+```{r echo=FALSE, eval=TRUE}
 pbvar <-
 function(x,beta=.2){
 #   Compute the percentage bend midvariance
@@ -122,7 +124,7 @@ data <- c(1.5, 2, 2.5, 3, 1, 5, 5.5, 4.5, 3, 3)
 ```
 
 Cálculo del intervalo de confianza con coeficiente 0'95 para media 0'2-recortada.
-```{r}
+```{r problema-5.1}
 trimCi <- MeanCI(data, conf.level = 0.95 , trim=0.2)
 
 plot(density(data), main = "Intervalo de confianza a 0'95 para media 0'2-recortada ") + abline(v=trimCi[1], col='green') + text(trimCi[1], 0, "Media") + abline(v=trimCi[2], col='red') + text(trimCi[2], 0.05, "Cota inferior IC") + abline(v=trimCi[3], col='red') + text(trimCi[3], 0.05, "Cota superior IC")
@@ -130,10 +132,132 @@ plot(density(data), main = "Intervalo de confianza a 0'95 para media 0'2-recorta
 ```
 Cálculo del intervalo de confianza con coeficiente 0'95 para el tiempo mediano de espera.
 
-```{r}
+```{r problema-5.2}
 medianCI <- MedianCI(data, conf.level = 0.95)
 
 plot(density(data), main = "Intervalo de confianza a 0'95 para mediana ") + abline(v=medianCI[1], col='green') + text(medianCI[1], 0, "Mediana") + abline(v=medianCI[2], col='red') + text(medianCI[2], 0.05, "Cota inferior IC") + abline(v=medianCI[3], col='red') + text(medianCI[3], 0.05, "Cota superior IC")
 
 ```
 
+## Problema 6
+
+Se quiere averiguar si, en promedio, existen diferencias significativas entre los precios de dos restaurantes, A y B. Para ello se eligieron al azar 11 días en los que se anotó el precio del menú del día en el restaurante A y otros 11 días en los que se anotó el precio del menú del día en el restaurante B. Los datos obtenidos fueron los siguientes:
+
+A: 1325 1500  995 1250 1290 1900 1500 1100 1250 1150 1900
+B: 1100 1400 1000 1300 1300 1700 1250 1200 1150 1200 1700
+
+```{r problema-6}
+data_A <- c(1325, 1500, 995, 1250, 1290, 1900, 1500, 1100, 1250, 1150, 1900)
+data_B <- c(1100, 1400, 1000, 1300, 1300, 1700, 1250, 1200, 1150, 1200, 1700)
+```
+¿ Puede afirmarse a partir de dichos datos que existen diferencias significativas entre ambos restaurantes a nivel $\alpha = 0'05$ ?
+
+
+Si comparamos las distribuciones de las poblaciones muestrales se comprueba que las diferencias, a simple vista, son escasas, haciéndose notar en la cola derecha (precios más altos). De hecho, se podría decir que cada distribución está compuesta por la suma de dos distribuciones: Una para los precios baratos y medios, y otra para los precios altos.
+```{r problema-6extra}
+plot(density(data_A), main = "Curva de densidades A y B")
+par(new=TRUE)
+plot(density(data_B), col='blue' ,xaxt='n', yaxt='n', ann=FALSE, main = "Restaurante B ")
+```
+
+
+a) Utilizando las diferencias de medias 0'2-recortadas muestrales 
+
+Como se ha comentado, **no existen diferencias significativas** a simple vista. **Aplicando las medias 0'2-recortadas, se confirma esta afirmación**.
+
+```{r problema-6a}
+
+trimCi_A <- mean(data_A, trim = 0.2)
+trimCi_B <- mean(data_B, trim = 0.2)
+```
+
+```{r problema-6a1}
+
+trimCiA <- MeanCI(data_A, conf.level = 0.95 , trim=0.2)
+trimCiB <- MeanCI(data_B, conf.level = 0.95 , trim=0.2)
+
+plot(density(data_A), main = "Intervalo de confianza a 0'95 para media 0'2-recortada ") + abline(v=trimCiA[1], col='green') + text(trimCiA[1], 0, "Media") + abline(v=trimCiA[2], col='red') + text(trimCiA[2], 0.001, "Cota inferior IC") + abline(v=trimCiA[3], col='red') + text(trimCiA[3], 0.001, "Cota superior IC")
+par(new=TRUE)
+plot(density(data_B), col='blue' ,xaxt='n', yaxt='n', ann=FALSE, main = "Intervalo de confianza a 0'95 para media 0'2-recortada ") + abline(v=trimCiB[1], col='green') + abline(v=trimCiB[2], col='red') + abline(v=trimCiB[3], col='red')
+```
+b) Utilizando la generalización robusta del test de Wilcoxon-Mann-Whitney
+
+Si consideramos la hipótesis nula $H_0 : M_A = M_B$ y la alternativa $H_1 : M_A \neq  M_B$, y dado que $ H_0 : p = 1/2 $, se va a determinar un intervalo de confainza para p, de coeficiente de confianza $0'95$. En caso de que el valor $1/2$ se incluya en el intervalo calculado, entonce se aceptará la hipótesis nula de igualdad de las poblaciones.
+
+Utilizaremos la función wilcox.test, dónde si asignamos el valor del parámetro paired = FALSE, según la documentación estaremos aplicando el test de la suma de rango de Wilcoxon, equivalente al test de Mann-Whitney.
+
+```{r}
+wilcox.test(x = data_A, y = data_B, conf.level = 0.95, conf.int = TRUE, paired = FALSE)
+```
+
+Puesto que el valor 0.5 se encuentra dentro del intervalo de confianza y que el p-valor es lo suficientemente grande, confirmamos la hipótesis $H_0 : M_A = M_B$.
+
+
+## Problema 7
+
+Se quiere averiguar si tres fertilizantes, A, B y C presentan diferencias significativas en cuanto a sus efectos sobre el aumento de la cosecha.
+
+Con este propósito se eligieron al azar 15 parcelas al as que se fertilizó aleatoriamente con cada uno de los fertilizantes en cuestión. Los aumentos de cosecha obtenidos fueron los siguientes:
+
+|Fertilizante|Aumento de cosecha|
+|-----------:|------------------|
+|     A     :|39  33  39  35  32|
+|     B     :|36  40  35  30  29|
+|     C     :|33  33  36  26  35|
+
+A la vista de estos datos y recortando $\alpha = 0'1$, ¿ puede inferirse que existen diferencias significativas entre los tres fertilizantes?
+
+La siguiente gráfica muestra la ausencia de normalidad en todas las distribuciones, siendo la de B (línea color rojo) las más cercana a dicha normalidad. En el caso de C (color negro), se puede ver una composición de dos distribuciones, siendo la primera de ellas (a la izquierda) presumiblemente normal.
+
+```{r problema-7prev}
+A <- c(39,33,39,35,32)
+B <- c(36,40,35,30,29)
+C <- c(33,33,36,26,35)
+
+
+plot(density(A), col='BLUE', main='Densidades muestrales de A,B y C')
+par(new=TRUE)
+plot(density(B), col='RED',xaxt='n', yaxt='n', ann=FALSE)
+par(new=TRUE)
+plot(density(C), xaxt='n', yaxt='n', ann=FALSE)
+```
+
+
+
+a) Utilizando la generalización robusta del test de Welch.
+
+```{r problema-7}
+clnames <- list("aumentoCosecha", "fertilizante")
+A <- data.frame(c(39,33,39,35,32),factor("A"))
+names(A) <- clnames 
+B <- data.frame(c(36,40,35,30,29), factor("B"))
+names(B) <- clnames 
+C <- data.frame(c(33,33,36,26,35), factor("C"))
+names(C) <- clnames 
+
+x <- rbind(A,B,C)
+welch.test(formula =  aumentoCosecha ~ fertilizante, data = x, rate = 0.1)
+
+```
+
+
+b) Utilizando la generalización robusta del test de Box.
+
+
+```{r}
+box.test(formula =  aumentoCosecha ~ fertilizante, data = x, verbose = TRUE)
+```
+
+
+## Problema 8
+
+Se cree que la duración del revestimiento de un estanque depende de la cantidad de cal hidráulica que contiene. Para analizar esta relación se midió, en siete revestimientos, el tiempo, Y, hasta la aparición de filtraciones, teniendo cada uno de los revestimientos diferentes porcentajes de cal hidráulica, X. Los resultados obtenidos fueron los siguientes:
+
+X:  4, 10,  80,  45,  25,  60,  90
+Y: 12, 26, 180, 132, 100, 200, 230
+
+Se pide:
+
+a) La recta de M-regresión óptima.
+b) La recta de regresión media biponderada.
+c) La recta de regresión winsorizada.
