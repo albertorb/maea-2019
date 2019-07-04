@@ -24,6 +24,10 @@ if (!require(plotrix)) install.packages('plotrix')
 library(plotrix)
 if (!require(onewaytests)) install.packages('onewaytests')
 library(onewaytests)
+if (!require(fda)) install.packages('fda')
+library(fda)
+if (!require(quadprog)) install.packages('quadprog')
+library(quadprog)
 
 
 opts_chunk$set(dev = 'pdf', fig.align = 'center')
@@ -243,6 +247,7 @@ welch.test(formula =  aumentoCosecha ~ fertilizante, data = x, rate = 0.1)
 
 b) Utilizando la generalización robusta del test de Box.
 
+Como vemos a continuación, se reafirma que la diferencia no es estadísticamente significativa.
 
 ```{r}
 box.test(formula =  aumentoCosecha ~ fertilizante, data = x, verbose = TRUE)
@@ -256,8 +261,61 @@ Se cree que la duración del revestimiento de un estanque depende de la cantidad
 X:  4, 10,  80,  45,  25,  60,  90
 Y: 12, 26, 180, 132, 100, 200, 230
 
+```{r problema-8prev}
+X <- c(4, 10,  80,  45,  25,  60,  90)
+Y <- c(12, 26, 180, 132, 100, 200, 230)
+
+```
+
+
 Se pide:
 
 a) La recta de M-regresión óptima.
+
+```{r problema-8}
+plot(X,Y)
+```
+
+Se aprecia en la gráfica anterior que no hay ningún punto que pudiera ser considerado outlier.
+
+```{r problema-8a}
+mregresion <- rlm(formula = Y~X, method = 'M', scale.est = 'Huber')$coefficients
+mregresion
+```
+Se obtiene que la recta es $ y = 17'39 + 2'41x$ la de mínimos cuadrados, la cual se obtiene ejecutando:
+
+```{r problema-8a2}
+ols <- lm(Y~X)$coefficients
+ols
+```
+
+
 b) La recta de regresión media biponderada.
+
+También puede obtener mediante la función rlm utilizando 'MM' como método.
+
+```{r problema-8b}
+biweighted <- rlm(formula = Y~X, method = 'MM')$coefficients
+biweighted
+```
+
+
 c) La recta de regresión winsorizada.
+
+```{r problema-8c}
+data <- data.frame(X, Y)
+
+winsr <- lmWinsor(formula = Y~X, data=data)$coefficients
+winsr
+```
+
+A continuación se dibujan todas las rectas obtenidas en una misma gráfica para su comparación. En dicha gráfica veremos como el resultado obtenido es prácticamente el mismo debido a la ausencia de valores extremos.
+
+```{r problema-8extra}
+plot(X,Y)
+abline(mregresion)
+abline(ols, col=2)
+abline(biweighted, col=3)
+abline(winsr, col=4)
+```
+
